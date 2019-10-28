@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using ColossalFramework.Plugins;
 
-namespace MeshInfo
+namespace MCSI
 {
     public class DebugUtils
     {
-        public const string modPrefix = "[Mesh Info] ";
+        public const string modPrefix = "[MCSI] ";
 
         public static void Message(string message)
         {

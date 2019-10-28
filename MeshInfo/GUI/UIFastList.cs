@@ -5,7 +5,7 @@ using System;
 
 using UIUtils = SamsamTS.UIUtils;
 
-namespace MeshInfo.GUI
+namespace MCSI.GUI
 {
     public interface IUIFastListRow
     {
@@ -274,6 +274,7 @@ namespace MeshInfo.GUI
             get { return (m_stepSize > 0) ? m_stepSize : m_rowHeight; }
             set { m_stepSize = value; }
         }
+
         #endregion
 
         #region Events

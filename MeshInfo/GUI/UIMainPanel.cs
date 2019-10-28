@@ -2,10 +2,13 @@
 using ColossalFramework.UI;
 
 using System;
-
+using MCSI;
 using UIUtils = SamsamTS.UIUtils;
+using ColossalFramework;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace MeshInfo.GUI
+namespace MCSI.GUI
 {
     public class UIMainPanel : UIPanel
     {
@@ -31,7 +34,7 @@ namespace MeshInfo.GUI
         {
             base.Start();
 
-            name = "MeshInfo";
+            name = "MCSI";
             atlas = UIUtils.GetAtlas("Ingame");
             backgroundSprite = "UnlockingPanel2";
             isVisible = false;
@@ -40,7 +43,7 @@ namespace MeshInfo.GUI
             width = 770;
             height = 475;
             relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2), Mathf.Floor((GetUIView().fixedHeight - height) / 2));
-            
+
             SetupControls();
 
         }
@@ -54,28 +57,10 @@ namespace MeshInfo.GUI
         {
             base.Update();
 
-            // Super secret key combination
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.K))
             {
                 isVisible = true;
-                BringToFront();
-
-                m_showDefault = !m_showDefault;
                 InitializePreafabLists();
-            }
-            else if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.M))
-            {
-                isVisible = !isVisible;
-
-                if (isVisible)
-                {
-                    InitializePreafabLists();
-                    BringToFront();
-                }
-                else
-                {
-                    m_showDefault = false;
-                }
             }
         }
 
@@ -86,7 +71,7 @@ namespace MeshInfo.GUI
             // Title Bar
             m_title = AddUIComponent<UITitleBar>();
             m_title.iconSprite = "IconAssetBuilding";
-            m_title.title = "Mesh Info " + MeshInfo.version;
+            m_title.title = "Mayoral City Service Info " + MCSI.version;
 
             // Type DropDown
             UILabel label = AddUIComponent<UILabel>();
@@ -97,21 +82,19 @@ namespace MeshInfo.GUI
 
             m_prefabType = UIUtils.CreateDropDown(this);
             m_prefabType.width = 110;
-            m_prefabType.AddItem("Building");
-            m_prefabType.AddItem("Prop");
-            m_prefabType.AddItem("Tree");
-            m_prefabType.AddItem("Vehicle");
+            m_prefabType.AddItem("All");
+            foreach (var allowedService in allowedServices)
+                m_prefabType.AddItem(allowedService.ToString());
             m_prefabType.selectedIndex = 0;
             m_prefabType.relativePosition = label.relativePosition + new Vector3(60f, 0f);
 
             m_prefabType.eventSelectedIndexChanged += (c, t) =>
             {
                 m_prefabType.enabled = false;
-                m_isSorted = false;
                 PopulateList();
                 m_prefabType.enabled = true;
             };
-
+            /*
             // Sorting DropDown
             label = AddUIComponent<UILabel>();
             label.textScale = 0.8f;
@@ -151,7 +134,7 @@ namespace MeshInfo.GUI
                 m_isSorted = false;
                 PopulateList();
             };
-
+            */
             // Search
             m_search = UIUtils.CreateTextField(this);
             m_search.width = 150f;
@@ -167,7 +150,7 @@ namespace MeshInfo.GUI
 
 
             m_search.eventTextChanged += (c, t) => PopulateList();
-
+            /*
             // Labels
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
@@ -188,145 +171,101 @@ namespace MeshInfo.GUI
             label.textScale = 0.9f;
             label.text = "Triangles";
             label.relativePosition = label2.relativePosition - new Vector3(115f, 0f);
-
+            */
             // Item List
             m_itemList = UIFastList.Create<UIPrefabItem>(this);
             m_itemList.rowHeight = 40f;
+            m_itemList.canSelect = true;
             m_itemList.backgroundSprite = "UnlockingPanel";
             m_itemList.width = width - 10;
             m_itemList.height = height - offset - 75;
             m_itemList.relativePosition = new Vector3(5f, offset + 70f);
         }
 
+        private ItemClass.Service[] allowedServices = new[]{
+            ItemClass.Service.Beautification
+                , ItemClass.Service.Disaster
+                , ItemClass.Service.Electricity
+                , ItemClass.Service.FireDepartment
+                , ItemClass.Service.Garbage
+                , ItemClass.Service.HealthCare
+                , ItemClass.Service.PlayerEducation
+                , ItemClass.Service.PlayerIndustry
+                , ItemClass.Service.PoliceDepartment
+                , ItemClass.Service.Water };
+
+        List<XMLBuilding> buildings = new List<XMLBuilding>();
+        List<ushort> buildingMap = new List<ushort>();
+
         private void InitializePreafabLists()
         {
-            m_isSorted = false;
-
-            int prefabCount = PrefabCollection<BuildingInfo>.PrefabCount();
-            int count = 0;
-            int maxCount = prefabCount;
-
-            // Buildings
-            m_buildingPrefabs = new MeshData[prefabCount];
-            for (uint i = 0; i < prefabCount; i++)
-            {
-                PrefabInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-                if (prefab != null && (m_showDefault || prefab.name.Contains(".")))
-                {
-                    if ((prefab as BuildingInfo).m_mesh == null || !(prefab as BuildingInfo).m_mesh.isReadable) continue;
-                    m_buildingPrefabs[count++] = new MeshData(prefab);
-                }
-            }
-            Array.Resize<MeshData>(ref m_buildingPrefabs, count);
-
-            // Props
-            prefabCount = PrefabCollection<PropInfo>.PrefabCount();
-            count = 0;
-            maxCount = Math.Max(maxCount, prefabCount);
-            m_propPrefabs = new MeshData[prefabCount];
-            for (uint i = 0; i < prefabCount; i++)
-            {
-                PrefabInfo prefab = PrefabCollection<PropInfo>.GetPrefab(i);
-                if (prefab != null && (m_showDefault || prefab.name.Contains(".")))
-                {
-                    if ((prefab as PropInfo).m_mesh == null || !(prefab as PropInfo).m_mesh.isReadable) continue;
-                    m_propPrefabs[count++] = new MeshData(prefab);
-                }
-            }
-            Array.Resize<MeshData>(ref m_propPrefabs, count);
-
-            // Trees
-            prefabCount = PrefabCollection<TreeInfo>.PrefabCount();
-            count = 0;
-            maxCount = Math.Max(maxCount, prefabCount);
-            m_treePrefabs = new MeshData[prefabCount];
-            for (uint i = 0; i < prefabCount; i++)
-            {
-                PrefabInfo prefab = PrefabCollection<TreeInfo>.GetPrefab(i);
-                if (prefab != null && (m_showDefault || prefab.name.Contains(".")))
-                {
-                    if ((prefab as TreeInfo).m_mesh == null || !(prefab as TreeInfo).m_mesh.isReadable) continue;
-                    m_treePrefabs[count++] = new MeshData(prefab);
-                }
-            }
-            Array.Resize<MeshData>(ref m_treePrefabs, count);
-
-            // Vehicles
-            prefabCount = PrefabCollection<VehicleInfo>.PrefabCount();
-            count = 0;
-            maxCount = Math.Max(maxCount, prefabCount);
-            m_vehiclePrefabs = new MeshData[prefabCount];
-            for (uint i = 0; i < prefabCount; i++)
-            {
-                PrefabInfo prefab = PrefabCollection<VehicleInfo>.GetPrefab(i);
-                if (prefab != null && (m_showDefault || prefab.name.Contains(".")))
-                {
-                    if ((prefab as VehicleInfo).m_mesh == null || !(prefab as VehicleInfo).m_mesh.isReadable) continue;
-                    m_vehiclePrefabs[count++] = new MeshData(prefab);
-                }
-            }
-            Array.Resize<MeshData>(ref m_vehiclePrefabs, count);
-
+            buildings.Clear();
+            buildingMap.Clear();
+            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            foreach (var allowedService in allowedServices)
+                GetServiceBuildings(buildingManager, allowedService);
             PopulateList();
         }
 
+        private void GetServiceBuildings(BuildingManager buildingManager, ItemClass.Service service)
+        {
+            var m_size = buildingManager.GetServiceBuildings(service);
+            for (ushort i = 0; i < m_size.m_size; i++)
+            {
+                Building building = buildingManager.m_buildings.m_buffer[m_size[i]];
+                if (EnumExtensions.IsFlagSet(building.m_flags, Building.Flags.Created))
+                {
+                    InstanceID instanceID = InstanceID.Empty;
+                    instanceID.Building = m_size[i];
+                    BuildingInfo info = building.Info;
+                    buildings.Add(new XMLBuilding
+                    {
+                        instanceID = instanceID,
+                        name = EnumExtensions.IsFlagSet(building.m_flags, Building.Flags.CustomName)
+                            ? buildingManager.GetBuildingName(m_size[i], info.m_instanceID)
+                            : info.GetLocalizedTitle(),
+                        position = building.m_position,
+                        service = service,
+                        stats = info.m_buildingAI.GetLocalizedStats(m_size[i], ref building).Replace(Environment.NewLine, "; "),
+                        tooltip = info.GetLocalizedTooltip(),
+                        upkeep = info.m_buildingAI.GetResourceRate(m_size[i], ref building, EconomyManager.Resource.Maintenance)
+                    });
+                    buildingMap.Add(m_size[i]);
+                }
+            }
+        }
+        string[] serviceStrings = Enum.GetNames(typeof(ItemClass.Service));
+
         private void PopulateList()
         {
-            MeshData[] prefabList = null;
-
+            var prefabList = buildings.ToArray();
             int index = m_prefabType.selectedIndex;
-            switch(index)
-            {
-                case 0:
-                    prefabList = m_buildingPrefabs;
-                    break;
-                case 1:
-                    prefabList = m_propPrefabs;
-                    break;
-                case 2:
-                    prefabList = m_treePrefabs;
-                    break;
-                case 3:
-                    prefabList = m_vehiclePrefabs;
-                    break;
-            }
+
+            if (index != 0)
+                prefabList = buildings.Where(building => building.service == allowedServices[index - 1]).ToArray();
 
             if (prefabList == null) return;
 
             // Filtering
             string filter = m_search.text.Trim().ToLower();
             if (!String.IsNullOrEmpty(filter))
-            {
-                MeshData[] filterList = new MeshData[prefabList.Length];
-                int count = 0;
-
-                for(int i = 0; i < prefabList.Length; i++)
-                {
-                    if (prefabList[i].name.ToLower().Contains(filter) || (prefabList[i].steamID != null && prefabList[i].steamID.Contains(filter)))
-                    {
-                        filterList[count++] = prefabList[i];
-                    }
-                }
-
-                Array.Resize<MeshData>(ref filterList, count);
-                prefabList = filterList;
-            }
+                prefabList = buildings.Where(building => building.name.ToLower().Contains(filter.ToLower())).ToArray();
 
             // Sorting
-            if (!m_isSorted)
-            {
-                MeshData.sorting = (MeshData.Sorting)m_sorting.selectedIndex;
-                MeshData.ascendingSort = (m_sortDirection.flip == UISpriteFlip.None);
-                Array.Sort(prefabList);
-
-                m_isSorted = true;
-            }
+            //Array.Sort(prefabList, CompareByNames);
 
             // Display
             m_itemList.rowsData.m_buffer = prefabList;
             m_itemList.rowsData.m_size = prefabList.Length;
 
             m_itemList.DisplayAt(0);
+        }
+        public int CompareByNames(XMLBuilding city1, XMLBuilding city2)
+        {
+            if (m_sortDirection.flip == UISpriteFlip.None)
+                return String.Compare(serviceStrings[(int)city1.service] + city1.name, serviceStrings[(int)city2.service] + city2.name);
+            else
+                return String.Compare(serviceStrings[(int)city1.service] + city1.name, serviceStrings[(int)city2.service] + city2.name);
         }
     }
 }

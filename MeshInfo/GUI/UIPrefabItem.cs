@@ -1,13 +1,9 @@
-﻿using System;
-
-using UnityEngine;
+﻿using UnityEngine;
 using ColossalFramework.UI;
-using ColossalFramework.PlatformServices;
-using ColossalFramework.Globalization;
 
 using UIUtils = SamsamTS.UIUtils;
 
-namespace MeshInfo.GUI
+namespace MCSI.GUI
 {
     public class UIPrefabItem : UIPanel, IUIFastListRow
     {
@@ -18,12 +14,11 @@ namespace MeshInfo.GUI
         private UILabel m_lodWeight;
         private UILabel m_textureSize;
         private UILabel m_lodTextureSize;
-        private UITextField m_steamID;
         private UIPanel m_background;
 
-        private MeshData m_meshData;
+        private XMLBuilding m_meshData;
 
-        public UIPanel background
+        public UIPanel Background
         {
             get
             {
@@ -62,13 +57,13 @@ namespace MeshInfo.GUI
 
             m_lodTextureSize = AddUIComponent<UILabel>();
             m_lodTextureSize.textScale = 0.9f;
-            m_lodTextureSize.width = 70f;
+            m_lodTextureSize.width = 300f;
             m_lodTextureSize.height = height;
             m_lodTextureSize.textAlignment = UIHorizontalAlignment.Center;
             m_lodTextureSize.pivot = UIPivotPoint.MiddleCenter;
             m_lodTextureSize.padding = new RectOffset(0, 10, 0, 0);
             m_lodTextureSize.AlignTo(this, UIAlignAnchor.TopRight);
-
+            /*
             m_textureSize = AddUIComponent<UILabel>();
             m_textureSize.textScale = 0.9f;
             m_textureSize.width = 90f;
@@ -109,33 +104,7 @@ namespace MeshInfo.GUI
             m_triangles.textAlignment = UIHorizontalAlignment.Center;
             m_triangles.pivot = UIPivotPoint.MiddleCenter;
             m_triangles.relativePosition = m_lodTriangles.relativePosition - new Vector3(80f, 0f);
-            
-            m_steamID = UIUtils.CreateTextField(this);
-            m_steamID.normalBgSprite = null;
-            m_steamID.padding = new RectOffset(5, 5, 14, 14);
-            m_steamID.textScale = 0.8f;
-            m_steamID.height = 40;
-            m_steamID.textColor = new Color32(128, 128, 128, 255);
-            m_steamID.selectionBackgroundColor = new Color32(0, 0, 0, 128);
-            m_steamID.numericalOnly = true;
-            m_steamID.relativePosition = m_triangles.relativePosition - new Vector3(100f, 0f);
-
-            m_steamID.eventTextChanged += (c, t) =>
-            {
-                if (m_meshData.name.Contains("."))
-                    m_steamID.text = m_meshData.name.Substring(0, m_meshData.name.IndexOf("."));
-            };
-
-            m_name.eventDoubleClick += (c, t) =>
-            {
-                if (PlatformService.IsOverlayEnabled() && !String.IsNullOrEmpty(m_steamID.text))
-                {
-                    PublishedFileId publishedFileId = new PublishedFileId((ulong)Int32.Parse(m_steamID.text));
-
-                    if (publishedFileId != PublishedFileId.invalid)
-                        PlatformService.ActivateGameOverlayToWorkshopItem(publishedFileId);
-                }
-            };
+            */
         }
 
         public override void OnDestroy()
@@ -143,29 +112,25 @@ namespace MeshInfo.GUI
             base.OnDestroy();
 
             Destroy(m_name);
-            Destroy(m_triangles);
-            Destroy(m_lodTriangles);
-            Destroy(m_weight);
-            Destroy(m_lodWeight);
-            Destroy(m_textureSize);
-            Destroy(m_steamID);
+            Destroy(m_lodTextureSize);
+            //Destroy(m_triangles);
+            //Destroy(m_weight);
+            //Destroy(m_lodWeight);
+            //Destroy(m_textureSize);
             Destroy(m_background);
         }
 
-        public void Display(object prefab, bool isRowOdd)
+        public void Display(object obj, bool isRowOdd)
         {
-            m_meshData = prefab as MeshData;
+            m_meshData = obj as XMLBuilding;
 
-            if (m_meshData == null || m_name == null) return;
+            if (m_meshData == null || m_name == null) return; 
 
             m_name.text = m_meshData.name;
+            m_name.tooltip = m_meshData.tooltip;
 
-            m_steamID.text = (m_meshData.steamID == null) ? "" : m_meshData.steamID;
-            m_steamID.isVisible = (m_meshData.steamID != null);
-
-            m_triangles.text = (m_meshData.triangles > 0) ? m_meshData.triangles.ToString("N0") : "-";
-            m_lodTriangles.text = (m_meshData.lodTriangles > 0) ? m_meshData.lodTriangles.ToString("N0") : "-";
-
+            m_lodTextureSize.text = m_meshData.stats;
+            /*
             m_weight.text = (m_meshData.weight > 0) ? m_meshData.weight.ToString("N2") : "-";
             if (m_meshData.weight >= 200)
                 m_weight.textColor = new Color32(255, 0, 0, 255);
@@ -188,17 +153,19 @@ namespace MeshInfo.GUI
 
             m_textureSize.text = (m_meshData.textureSize != Vector2.zero) ? m_meshData.textureSize.x + "x" + m_meshData.textureSize.y : "-";
             m_lodTextureSize.text = (m_meshData.lodTextureSize != Vector2.zero) ? m_meshData.lodTextureSize.x + "x" + m_meshData.lodTextureSize.y : "-";
-
+            */
             if (isRowOdd)
             {
-                background.backgroundSprite = "UnlockingItemBackground";
-                background.color = new Color32(0, 0, 0, 128);
+                Background.backgroundSprite = "UnlockingItemBackground";
+                Background.color = new Color32(0, 0, 0, 128);
             }
             else
-                background.backgroundSprite = null;
+                Background.backgroundSprite = null;
         }
 
-        public void Select(bool isRowOdd) { }
+        public void Select(bool isRowOdd)
+            => ToolsModifierControl.cameraController.SetTarget(m_meshData.instanceID, m_meshData.position, true);
+
         public void Deselect(bool isRowOdd) { }
     }
 }

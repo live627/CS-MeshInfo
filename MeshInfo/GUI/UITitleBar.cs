@@ -3,7 +3,7 @@ using ColossalFramework.UI;
 
 using UIUtils = SamsamTS.UIUtils;
 
-namespace MeshInfo.GUI
+namespace MCSI.GUI
 {
     public class UITitleBar : UIPanel
     {
