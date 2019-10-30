@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ColossalFramework.UI;
 
 using UIUtils = SamsamTS.UIUtils;
 
 namespace MCSI.GUI
 {
-    public class UIPrefabItem : UIPanel, IUIFastListRow
+    public class UIPrefabItem : UIFastListRow
     {
         private UILabel m_name;
         private UILabel m_triangles;
@@ -17,6 +17,7 @@ namespace MCSI.GUI
         private UIPanel m_background;
 
         private XMLBuilding m_meshData;
+        private Color32 baseaBgColor;
 
         public UIPanel Background
         {
@@ -105,6 +106,15 @@ namespace MCSI.GUI
             m_triangles.pivot = UIPivotPoint.MiddleCenter;
             m_triangles.relativePosition = m_lodTriangles.relativePosition - new Vector3(80f, 0f);
             */
+
+            eventMouseEnter += (component, eventParam) => Background.opacity = Mathf.Lerp(baseBgOpacity, 1, 0.5f);
+            eventMouseLeave += (component, eventParam) => Background.opacity = baseBgOpacity;
+            eventClick += (component, p) =>
+            {
+                Background.opacity = Mathf.Lerp(baseBgOpacity, 1, 0.75f);
+                WorldInfoPanel.Show<CityServiceWorldInfoPanel>(m_meshData.position, m_meshData.instanceID);
+                ToolsModifierControl.cameraController.SetTarget(m_meshData.instanceID, m_meshData.position, true);
+            };
         }
 
         public override void OnDestroy()
@@ -120,7 +130,7 @@ namespace MCSI.GUI
             Destroy(m_background);
         }
 
-        public void Display(object obj, bool isRowOdd)
+        public override void Display(object obj, bool isRowOdd)
         {
             m_meshData = obj as XMLBuilding;
 
@@ -154,18 +164,9 @@ namespace MCSI.GUI
             m_textureSize.text = (m_meshData.textureSize != Vector2.zero) ? m_meshData.textureSize.x + "x" + m_meshData.textureSize.y : "-";
             m_lodTextureSize.text = (m_meshData.lodTextureSize != Vector2.zero) ? m_meshData.lodTextureSize.x + "x" + m_meshData.lodTextureSize.y : "-";
             */
-            if (isRowOdd)
-            {
-                Background.backgroundSprite = "UnlockingItemBackground";
-                Background.color = new Color32(0, 0, 0, 128);
-            }
-            else
-                Background.backgroundSprite = null;
+            baseBgOpacity = isRowOdd ? 0.25f : 0.1f;
+            Background.backgroundSprite = "1";
+            Background.opacity = baseBgOpacity;
         }
-
-        public void Select(bool isRowOdd)
-            => ToolsModifierControl.cameraController.SetTarget(m_meshData.instanceID, m_meshData.position, true);
-
-        public void Deselect(bool isRowOdd) { }
     }
 }

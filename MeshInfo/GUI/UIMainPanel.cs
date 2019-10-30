@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ColossalFramework.UI;
 
 using System;
@@ -19,11 +19,6 @@ namespace MCSI.GUI
         private UITextField m_search;
 
         private UIFastList m_itemList;
-
-        private MeshData[] m_buildingPrefabs;
-        private MeshData[] m_propPrefabs;
-        private MeshData[] m_treePrefabs;
-        private MeshData[] m_vehiclePrefabs;
 
         private bool m_showDefault = false;
 
@@ -174,9 +169,9 @@ namespace MCSI.GUI
             */
             // Item List
             m_itemList = UIFastList.Create<UIPrefabItem>(this);
-            m_itemList.rowHeight = 40f;
-            m_itemList.canSelect = true;
-            m_itemList.backgroundSprite = "UnlockingPanel";
+            m_itemList.RowHeight = 40f;
+            m_itemList.CanSelect = true;
+            m_itemList.BackgroundSprite = "UnlockingPanel";
             m_itemList.width = width - 10;
             m_itemList.height = height - offset - 75;
             m_itemList.relativePosition = new Vector3(5f, offset + 70f);
@@ -255,8 +250,8 @@ namespace MCSI.GUI
             //Array.Sort(prefabList, CompareByNames);
 
             // Display
-            m_itemList.rowsData.m_buffer = prefabList;
-            m_itemList.rowsData.m_size = prefabList.Length;
+            m_itemList.RowsData.m_buffer = prefabList;
+            m_itemList.RowsData.m_size = prefabList.Length;
 
             m_itemList.DisplayAt(0);
         }

@@ -1,7 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ColossalFramework.UI;
-
-using System;
 
 using UIUtils = SamsamTS.UIUtils;
 
@@ -29,14 +27,13 @@ namespace MCSI.GUI
         /// <param name="isRowOdd">Use this to display a different look for your odd rows</param>
         void Deselect(bool isRowOdd);
         #endregion
+    }
 
-        #region From UIPanel
-        // No need to implement those, they are in UIPanel
-        // Those are declared here so they can be used inside UIFastList
-        bool enabled { get; set; }
-        Vector3 relativePosition { get; set; }
-        event MouseEventHandler eventClick;
-        #endregion
+    public abstract class UIFastListRow : UIPanel, IUIFastListRow
+    {
+        public abstract void Display(object data, bool isRowOdd);
+        public void Select(bool isRowOdd) { }
+        public void Deselect(bool isRowOdd) { }
     }
 
     /// <summary>
@@ -73,10 +70,10 @@ namespace MCSI.GUI
         #region Private members
         private UIPanel m_panel;
         private UIScrollbar m_scrollbar;
-        private FastList<IUIFastListRow> m_rows;
+        private FastList<UIFastListRow> m_rows;
         private FastList<object> m_rowsData;
 
-        private Type m_rowType;
+        private System.Type m_rowType;
         private string m_backgroundSprite;
         private Color32 m_color = new Color32(255, 255, 255, 255);
         private float m_rowHeight = -1;
@@ -123,9 +120,9 @@ namespace MCSI.GUI
         /// <summary>
         /// Change the sprite of the background
         /// </summary>
-        public string backgroundSprite
+        public string BackgroundSprite
         {
-            get { return m_backgroundSprite; }
+            get => m_backgroundSprite;
             set
             {
                 if (m_backgroundSprite != value)
@@ -142,9 +139,9 @@ namespace MCSI.GUI
         /// Default value is false
         /// Rows can still be selected via selectedIndex
         /// </summary>
-        public bool canSelect
+        public bool CanSelect
         {
-            get { return m_canSelect; }
+            get => m_canSelect;
             set
             {
                 if (m_canSelect != value)
@@ -169,9 +166,9 @@ namespace MCSI.GUI
         /// This doesn't update the list if the position stay the same
         /// Use DisplayAt for that
         /// </summary>
-        public float listPosition
+        public float ListPosition
         {
-            get { return m_pos; }
+            get => m_pos;
             set
             {
                 if (m_rowHeight <= 0) return;
@@ -190,7 +187,7 @@ namespace MCSI.GUI
         /// You can also change rowsData.m_buffer and rowsData.m_size
         /// and refresh the display with DisplayAt method
         /// </summary>
-        public FastList<object> rowsData
+        public FastList<object> RowsData
         {
             get
             {
@@ -210,9 +207,9 @@ namespace MCSI.GUI
         /// <summary>
         /// This MUST be set, it is the height in pixels of each row
         /// </summary>
-        public float rowHeight
+        public float RowHeight
         {
-            get { return m_rowHeight; }
+            get => m_rowHeight;
             set
             {
                 if (m_rowHeight != value)
@@ -227,9 +224,9 @@ namespace MCSI.GUI
         /// Currently selected row
         /// -1 if none selected
         /// </summary>
-        public int selectedIndex
+        public int SelectedIndex
         {
-            get { return m_selectedDataId; }
+            get => m_selectedDataId;
             set
             {
                 if (m_rowsData == null || m_rowsData.m_size == 0)
@@ -269,12 +266,11 @@ namespace MCSI.GUI
         /// The number of pixels moved at each scroll step
         /// When set to 0 or less, rowHeight is used instead.
         /// </summary>
-        public float stepSize
+        public float StepSize
         {
-            get { return (m_stepSize > 0) ? m_stepSize : m_rowHeight; }
-            set { m_stepSize = value; }
+            get => (m_stepSize > 0) ? m_stepSize : m_rowHeight;
+            set => m_stepSize = value;
         }
-
         #endregion
 
         #region Events
@@ -285,6 +281,7 @@ namespace MCSI.GUI
         #endregion
 
         #region Public methods
+
         /// <summary>
         /// Clear the list
         /// </summary>
@@ -316,7 +313,7 @@ namespace MCSI.GUI
             for (int i = 0; i < m_rows.m_size; i++)
             {
                 int dataPos = Mathf.FloorToInt(m_pos + i);
-                float offset = rowHeight * (m_pos + i - dataPos);
+                float offset = RowHeight * (m_pos + i - dataPos);
                 if (dataPos < m_rowsData.m_size)
                 {
                     if (m_updateContent)
@@ -333,7 +330,7 @@ namespace MCSI.GUI
                 else
                     m_rows[i].enabled = false;
 
-                m_rows[i].relativePosition = new Vector3(0, i * rowHeight - offset);
+                m_rows[i].relativePosition = new Vector3(0, i * RowHeight - offset);
             }
 
             UpdateScrollbar();
@@ -362,8 +359,9 @@ namespace MCSI.GUI
 
             for (int i = 0; i < m_rows.m_size; i++)
             {
-                Destroy(m_rows[i] as UnityEngine.Object);
+                Destroy(m_rows[i]);
             }
+            DebugUtils.Log("destroyed");
         }
 
         protected override void OnSizeChanged()
@@ -386,9 +384,9 @@ namespace MCSI.GUI
             base.OnMouseWheel(p);
 
             if (m_stepSize > 0 && m_rowHeight > 0)
-                listPosition = m_pos - p.wheelDelta * m_stepSize / m_rowHeight;
+                ListPosition = m_pos - p.wheelDelta * m_stepSize / m_rowHeight;
             else
-                listPosition = m_pos - p.wheelDelta;
+                ListPosition = m_pos - p.wheelDelta;
         }
         #endregion
 
@@ -399,9 +397,9 @@ namespace MCSI.GUI
             int max = Mathf.Min(m_rowsData.m_size, m_rows.m_size);
             for (int i = 0; i < max; i++)
             {
-                if (component == (UIComponent)m_rows[i])
+                if (component == m_rows[i])
                 {
-                    selectedIndex = i + Mathf.FloorToInt(m_pos);
+                    SelectedIndex = i + Mathf.FloorToInt(m_pos);
                     return;
                 }
             }
@@ -415,7 +413,7 @@ namespace MCSI.GUI
 
             if (m_rows == null)
             {
-                m_rows = new FastList<IUIFastListRow>();
+                m_rows = new FastList<UIFastListRow>();
                 m_rows.SetCapacity(nbRows);
             }
 
@@ -424,7 +422,7 @@ namespace MCSI.GUI
                 // Adding missing rows
                 for (int i = m_rows.m_size; i < nbRows; i++)
                 {
-                    m_rows.Add(m_panel.AddUIComponent(m_rowType) as IUIFastListRow);
+                    m_rows.Add(m_panel.AddUIComponent(m_rowType) as UIFastListRow);
                     if (m_canSelect) m_rows[i].eventClick += OnRowClicked;
                 }
             }
@@ -432,10 +430,11 @@ namespace MCSI.GUI
             {
                 // Remove excess rows
                 for (int i = nbRows; i < m_rows.m_size; i++)
-                    Destroy(m_rows[i] as UnityEngine.Object);
+                    Destroy(m_rows[i]);
 
                 m_rows.SetCapacity(nbRows);
             }
+                DebugUtils.Log(nbRows.ToString());
 
             UpdateScrollbar();
         }
@@ -446,7 +445,7 @@ namespace MCSI.GUI
 
             float H = m_rowHeight * m_rowsData.m_size;
             float scrollSize = height * height / (m_rowHeight * m_rowsData.m_size);
-            float amount = stepSize * height / (m_rowHeight * m_rowsData.m_size);
+            float amount = StepSize * height / (m_rowHeight * m_rowsData.m_size);
 
             m_scrollbar.scrollSize = Mathf.Max(10f, scrollSize);
             m_scrollbar.minValue = 0f;
@@ -523,7 +522,7 @@ namespace MCSI.GUI
 
                 m_lock = true;
 
-                listPosition = m_scrollbar.value * (m_rowsData.m_size - height / m_rowHeight) / (height - m_scrollbar.scrollSize - 1f);
+                ListPosition = m_scrollbar.value * (m_rowsData.m_size - height / m_rowHeight) / (height - m_scrollbar.scrollSize - 1f);
                 m_lock = false;
             };
         }
