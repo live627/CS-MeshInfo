@@ -349,14 +349,7 @@ namespace MCSI.GUI
         public override void OnDestroy()
         {
             base.OnDestroy();
-
-            if (m_panel == null) return;
-
-            Destroy(m_panel);
-            Destroy(m_scrollbar);
-
             if (m_rows == null) return;
-
             for (int i = 0; i < m_rows.m_size; i++)
             {
                 Destroy(m_rows[i]);

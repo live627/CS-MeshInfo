@@ -120,13 +120,6 @@ namespace MCSI.GUI
         public override void OnDestroy()
         {
             base.OnDestroy();
-
-            Destroy(m_name);
-            Destroy(m_lodTextureSize);
-            //Destroy(m_triangles);
-            //Destroy(m_weight);
-            //Destroy(m_lodWeight);
-            //Destroy(m_textureSize);
             Destroy(m_background);
         }
 
