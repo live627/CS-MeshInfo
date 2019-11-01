@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using ColossalFramework.UI;
+using System.Linq;
 
 namespace SamsamTS
 {
@@ -13,7 +14,7 @@ namespace SamsamTS
 
         public static UIButton CreateButton(UIComponent parent)
         {
-            UIButton button = (UIButton)parent.AddUIComponent<UIButton>();
+            UIButton button = parent.AddUIComponent<UIButton>();
 
             button.atlas = GetAtlas("Ingame");
             button.size = new Vector2(90f, 30f);
@@ -28,7 +29,7 @@ namespace SamsamTS
 
         public static UICheckBox CreateCheckBox(UIComponent parent)
         {
-            UICheckBox checkBox = (UICheckBox)parent.AddUIComponent<UICheckBox>();
+            UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
 
             checkBox.width = 300f;
             checkBox.height = 20f;
@@ -147,7 +148,7 @@ namespace SamsamTS
                 if (_colorFIeldTemplate == null) return null;
             }
 
-            UIColorField colorField = UnityEngine.Object.Instantiate<GameObject>(_colorFIeldTemplate.gameObject).GetComponent<UIColorField>();
+            UIColorField colorField = Object.Instantiate(_colorFIeldTemplate.gameObject).GetComponent<UIColorField>();
             parent.AttachUIComponent(colorField.gameObject);
 
             colorField.size = new Vector2(40f, 26f);
@@ -178,23 +179,92 @@ namespace SamsamTS
             }
         }
 
-        private static Dictionary<string, UITextureAtlas> _atlases;
-
-        public static UITextureAtlas GetAtlas(string name)
+        public static UITabstrip CreateTabStrip(UIComponent parent)
         {
-            if (_atlases == null)
-            {
-                _atlases = new Dictionary<string, UITextureAtlas>();
+            UITabstrip tabstrip = parent.AddUIComponent<UITabstrip>();
+            tabstrip.name = "TabStrip";
+            //tabstrip.clipChildren = true;
 
-                UITextureAtlas[] atlases = Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
-                for (int i = 0; i < atlases.Length; i++)
+            return tabstrip;
+        }
+
+        public static UITabContainer CreateTabContainer(UIComponent parent)
+        {
+            UITabContainer tabContainer = parent.AddUIComponent<UITabContainer>();
+            tabContainer.name = "TabContainer";
+
+            return tabContainer;
+        }
+
+        public static UIButton CreateTabButton(UIComponent parent)
+        {
+            UIButton button = parent.AddUIComponent<UIButton>();
+            button.name = "TabButton";
+            button.height = 35f;
+            button.width = 35f;
+            button.normalBgSprite = "GenericTab";
+            button.disabledBgSprite = "GenericTabDisabled";
+            button.focusedBgSprite = "GenericTabFocused";
+            button.hoveredBgSprite = "GenericTabHovered";
+            button.pressedBgSprite = "GenericTabPressed";
+
+            return button;
+        }
+
+        public static UILabel CreateLabel(UIComponent parent, float width, float height)
+        {
+            UILabel label = parent.AddUIComponent<UILabel>();
+            label.textScale = 0.9f;
+            label.width = 90f;
+            label.height = height;
+
+            return label;
+        }
+
+        public static UILabel CreateLabelForGrid(UIComponent parent, Vector3 offset, float width, float height)
+        {
+            UILabel label = parent.AddUIComponent<UILabel>();
+            label.textScale = 0.9f;
+            label.width = width;
+            label.height = height;
+            label.textAlignment = UIHorizontalAlignment.Center;
+            label.pivot = UIPivotPoint.MiddleCenter;
+            label.relativePosition = offset + new Vector3(width, 0f);
+
+            return label;
+        }
+
+        private static readonly Dictionary<string, UITextureAtlas> atlases;
+        private static UITextureAtlas textureAtlas;
+
+        static UIUtils()
+        {
+            textureAtlas = CreateTextureAtlas();
+            atlases = Resources.FindObjectsOfTypeAll<UITextureAtlas>().ToDictionary(g => g.name, g => g);
+        }
+
+        public static UITextureAtlas GetAtlas(string name) => atlases[name];
+
+        private static UITextureAtlas CreateTextureAtlas()
+        {
+            Texture2D texture2D = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            Texture2D[] textures = new Texture2D[] { Texture2D.blackTexture, Texture2D.whiteTexture };
+            Rect[] regions = texture2D.PackTextures(textures, 0, 10);
+            Material material = Object.Instantiate(UIView.GetAView().defaultAtlas.material);
+            material.mainTexture = texture2D;
+            textureAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
+            textureAtlas.material = material;
+            textureAtlas.name = "MCSI";
+
+            for (int i = 0; i < textures.Length; i++)
+                textureAtlas.AddSprite(new UITextureAtlas.SpriteInfo
                 {
-                    if (!_atlases.ContainsKey(atlases[i].name))
-                        _atlases.Add(atlases[i].name, atlases[i]);
-                }
-            }
+                    name = i.ToString(),
+                    texture = textures[i],
+                    region = regions[i],
+                });
 
-            return _atlases[name];
+            return textureAtlas;
         }
     }
 }

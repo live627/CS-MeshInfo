@@ -17,7 +17,7 @@ namespace MCSI.GUI
         private UIPanel m_background;
 
         private XMLBuilding m_meshData;
-        private Color32 baseaBgColor;
+        private float baseBgOpacity;
 
         public UIPanel Background
         {
@@ -26,7 +26,7 @@ namespace MCSI.GUI
                 if (m_background == null)
                 {
                     m_background = AddUIComponent<UIPanel>();
-                    m_background.atlas = UIUtils.GetAtlas("Ingame");
+                    m_background.atlas = UIUtils.GetAtlas("MCSI");
                     m_background.width = width;
                     m_background.height = 40f;
                     m_background.relativePosition = Vector2.zero;
