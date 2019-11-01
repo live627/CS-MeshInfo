@@ -121,36 +121,25 @@ namespace MCSI.GUI
             m_search.padding = new RectOffset(6, 6, 6, 6);
             m_search.relativePosition = new Vector3(width - m_search.width - 15f, offset + 5f);
 
-            label = AddUIComponent<UILabel>();
+            UILabel label = AddUIComponent<UILabel>();
             label.textScale = 0.8f;
             label.padding = new RectOffset(0, 0, 8, 0);
             label.relativePosition = m_search.relativePosition - new Vector3(60f, 0f);
             label.text = "Search :";
 
-
             m_search.eventTextChanged += (c, t) => PopulateList();
-            /*
+
             // Labels
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
-            label.text = "Name";
+            label.text = Locale.Get("EXTENDED_PUBLIC_TRANSPORT_UI_ITEM_1");
             label.relativePosition = new Vector3(15f, offset + 50f);
 
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
-            label.text = "Texture";
+            label.text = Locale.Get("CAMPUSPANEL_VARSITYSPORTS_UPKEEP");
             label.relativePosition = new Vector3(width - 135f, offset + 50f);
-
-            UILabel label2 = AddUIComponent<UILabel>();
-            label2.textScale = 0.9f;
-            label2.text = "Weight";
-            label2.relativePosition = label.relativePosition - new Vector3(125f, 0f);
-
-            label = AddUIComponent<UILabel>();
-            label.textScale = 0.9f;
-            label.text = "Triangles";
-            label.relativePosition = label2.relativePosition - new Vector3(115f, 0f);
-            */
+            
             // Item List
             m_itemList = UIFastList.Create<UIPrefabItem>(this);
             m_itemList.RowHeight = 40f;

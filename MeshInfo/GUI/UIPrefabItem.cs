@@ -2,6 +2,7 @@ using UnityEngine;
 using ColossalFramework.UI;
 
 using UIUtils = SamsamTS.UIUtils;
+using ColossalFramework.Globalization;
 
 namespace MCSI.GUI
 {
@@ -48,64 +49,12 @@ namespace MCSI.GUI
             width = 740f;
             height = 40f;
 
-            m_name = AddUIComponent<UILabel>();
-            m_name.textScale = 0.9f;
-            m_name.width = 300f;
-            m_name.height = height;
+            m_name = UIUtils.CreateLabel(this, 90f, height);
             m_name.textAlignment = UIHorizontalAlignment.Left;
             m_name.pivot = UIPivotPoint.MiddleLeft;
             m_name.relativePosition = new Vector3(10f, 0f);
-
-            m_lodTextureSize = AddUIComponent<UILabel>();
-            m_lodTextureSize.textScale = 0.9f;
-            m_lodTextureSize.width = 300f;
-            m_lodTextureSize.height = height;
-            m_lodTextureSize.textAlignment = UIHorizontalAlignment.Center;
-            m_lodTextureSize.pivot = UIPivotPoint.MiddleCenter;
-            m_lodTextureSize.padding = new RectOffset(0, 10, 0, 0);
-            m_lodTextureSize.AlignTo(this, UIAlignAnchor.TopRight);
-            /*
-            m_textureSize = AddUIComponent<UILabel>();
-            m_textureSize.textScale = 0.9f;
-            m_textureSize.width = 90f;
-            m_textureSize.height = height;
-            m_textureSize.textAlignment = UIHorizontalAlignment.Center;
-            m_textureSize.pivot = UIPivotPoint.MiddleCenter;
-            m_textureSize.padding = new RectOffset(0, 10, 0, 0);
-            m_textureSize.relativePosition = m_lodTextureSize.relativePosition - new Vector3(90f, 0f);
-
-            m_lodWeight = AddUIComponent<UILabel>();
-            m_lodWeight.textScale = 0.9f;
-            m_lodWeight.width = 50f;
-            m_lodWeight.height = height;
-            m_lodWeight.textAlignment = UIHorizontalAlignment.Center;
-            m_lodWeight.pivot = UIPivotPoint.MiddleCenter;
-            m_lodWeight.relativePosition = m_textureSize.relativePosition - new Vector3(50f, 0f);
-
-            m_weight = AddUIComponent<UILabel>();
-            m_weight.textScale = 0.9f;
-            m_weight.width = 50f;
-            m_weight.height = height;
-            m_weight.textAlignment = UIHorizontalAlignment.Center;
-            m_weight.pivot = UIPivotPoint.MiddleCenter;
-            m_weight.relativePosition = m_lodWeight.relativePosition - new Vector3(50f, 0f);
-
-            m_lodTriangles = AddUIComponent<UILabel>();
-            m_lodTriangles.textScale = 0.9f;
-            m_lodTriangles.width = 50f;
-            m_lodTriangles.height = height;
-            m_lodTriangles.textAlignment = UIHorizontalAlignment.Center;
-            m_lodTriangles.pivot = UIPivotPoint.MiddleCenter;
-            m_lodTriangles.relativePosition = m_weight.relativePosition - new Vector3(50f, 0f);
-
-            m_triangles = AddUIComponent<UILabel>();
-            m_triangles.textScale = 0.9f;
-            m_triangles.width = 80f;
-            m_triangles.height = height;
-            m_triangles.textAlignment = UIHorizontalAlignment.Center;
-            m_triangles.pivot = UIPivotPoint.MiddleCenter;
-            m_triangles.relativePosition = m_lodTriangles.relativePosition - new Vector3(80f, 0f);
-            */
+            m_lodTextureSize = UIUtils.CreateLabelForGrid(this, m_name.relativePosition, 200f, height);
+            m_textureSize = UIUtils.CreateLabelForGrid(this, m_lodTextureSize.relativePosition, 90f, height);
 
             eventMouseEnter += (component, eventParam) => Background.opacity = Mathf.Lerp(baseBgOpacity, 1, 0.5f);
             eventMouseLeave += (component, eventParam) => Background.opacity = baseBgOpacity;
@@ -132,7 +81,10 @@ namespace MCSI.GUI
             m_name.text = m_meshData.name;
             m_name.tooltip = m_meshData.tooltip;
 
-            m_lodTextureSize.text = m_meshData.stats;
+            m_lodTextureSize.text = m_meshData.status;
+            float num = m_meshData.upkeep * 0.0016f;
+            m_textureSize.text = num.ToString((num < 10f) ? Settings.moneyFormat : Settings.moneyFormatNoCents, LocaleManager.cultureInfo);
+
             /*
             m_weight.text = (m_meshData.weight > 0) ? m_meshData.weight.ToString("N2") : "-";
             if (m_meshData.weight >= 200)
