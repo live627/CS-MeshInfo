@@ -19,6 +19,7 @@ namespace MCSI.GUI
         private UITextField m_search;
 
         private UIFastList m_itemList;
+        private static readonly PositionData<ItemClass.Service>[] kServices = Utils.GetOrderedEnumData<ItemClass.Service>("Game").Where(s => CanShowService(s.enumValue)).ToArray();
 
         private bool m_showDefault = false;
 
@@ -177,32 +178,65 @@ namespace MCSI.GUI
             m_itemList.relativePosition = new Vector3(5f, offset + 70f);
         }
 
-        private ItemClass.Service[] allowedServices = new[]{
-            ItemClass.Service.Beautification
-                , ItemClass.Service.Disaster
-                , ItemClass.Service.Electricity
-                , ItemClass.Service.FireDepartment
-                , ItemClass.Service.Garbage
-                , ItemClass.Service.HealthCare
-                , ItemClass.Service.PlayerEducation
-                , ItemClass.Service.PlayerIndustry
-                , ItemClass.Service.PoliceDepartment
-                , ItemClass.Service.Water };
+        protected UIButton SpawnSubEntry(UITabstrip strip, PositionData<ItemClass.Service> kService)
+        {
+            UIButton uIButton = strip.AddTab(kService.GetLocalizedName(), _templateButton, false);
+            string text = kService.GetIconSpriteName();
+            uIButton.normalFgSprite = text;
+            uIButton.focusedFgSprite = text + "Focused";
+            uIButton.hoveredFgSprite = text + "Hovered";
+            uIButton.pressedFgSprite = text + "Pressed";
+            uIButton.disabledFgSprite = text + "Disabled";
+            uIButton.tooltip = kService.GetLocalizedName();
+            return uIButton;
+        }
+
+        private static bool CanShowService(ItemClass.Service service)
+            => service == ItemClass.Service.Beautification
+                || service == ItemClass.Service.Disaster
+                || service == ItemClass.Service.Education
+                || service == ItemClass.Service.Electricity
+                || service == ItemClass.Service.FireDepartment
+                || service == ItemClass.Service.Garbage
+                || service == ItemClass.Service.HealthCare
+                || service == ItemClass.Service.PlayerEducation && SteamHelper.IsDLCOwned(SteamHelper.DLC.CampusDLC)
+                || service == ItemClass.Service.PlayerIndustry && SteamHelper.IsDLCOwned(SteamHelper.DLC.IndustryDLC)
+                || service == ItemClass.Service.PoliceDepartment
+                || service == ItemClass.Service.Water;
 
         List<XMLBuilding> buildings = new List<XMLBuilding>();
         List<ushort> buildingMap = new List<ushort>();
 
-        private void InitializePreafabLists()
+        private void PopulateList()
         {
             buildings.Clear();
             buildingMap.Clear();
+            string filter = m_search.text.Trim().ToLower();
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
-            foreach (var allowedService in allowedServices)
-                GetServiceBuildings(buildingManager, allowedService);
-            PopulateList();
+            for (int i = 0; i < kServices.Length; i++)
+                if (_tabstrip.selectedIndex == i)
+                    GetServiceBuildings(buildingManager, kServices[i].enumValue, filter);
+
+            // !!! Temporaary. Make buildings an array.
+            var prefabList = buildings.ToArray();
+
+            //Array.Sort(prefabList, CompareByNames);
+
+            m_itemList.RowsData.m_buffer = prefabList;
+            m_itemList.RowsData.m_size = prefabList.Length;
+
+            m_itemList.DisplayAt(0);
         }
 
-        private void GetServiceBuildings(BuildingManager buildingManager, ItemClass.Service service)
+        private int GetServiceBuildingCount(BuildingManager buildingManager)
+        {
+            int num = 0;
+            for (int i = 0; i < kServices.Length; i++)
+                num += buildingManager.GetServiceBuildings(kServices[i].enumValue).m_size;
+            return num;
+        }
+
+        private void GetServiceBuildings(BuildingManager buildingManager, ItemClass.Service service, string filter)
         {
             var m_size = buildingManager.GetServiceBuildings(service);
             for (ushort i = 0; i < m_size.m_size; i++)
@@ -210,18 +244,24 @@ namespace MCSI.GUI
                 Building building = buildingManager.m_buildings.m_buffer[m_size[i]];
                 if (EnumExtensions.IsFlagSet(building.m_flags, Building.Flags.Created))
                 {
+                    BuildingInfo info = building.Info;
+                    string name = EnumExtensions.IsFlagSet(building.m_flags, Building.Flags.CustomName)
+                        ? buildingManager.GetBuildingName(m_size[i], info.m_instanceID)
+                        : info.GetLocalizedTitle();
+
+                    if (!String.IsNullOrEmpty(filter) && name.ToLower().Contains(filter.ToLower()))
+                        continue;
+
                     InstanceID instanceID = InstanceID.Empty;
                     instanceID.Building = m_size[i];
-                    BuildingInfo info = building.Info;
                     buildings.Add(new XMLBuilding
                     {
                         instanceID = instanceID,
-                        name = EnumExtensions.IsFlagSet(building.m_flags, Building.Flags.CustomName)
-                            ? buildingManager.GetBuildingName(m_size[i], info.m_instanceID)
-                            : info.GetLocalizedTitle(),
+                        name = name,
                         position = building.m_position,
                         service = service,
                         stats = info.m_buildingAI.GetLocalizedStats(m_size[i], ref building).Replace(Environment.NewLine, "; "),
+                        status = info.m_buildingAI.GetLocalizedStatus(m_size[i], ref building),
                         tooltip = info.GetLocalizedTooltip(),
                         upkeep = info.m_buildingAI.GetResourceRate(m_size[i], ref building, EconomyManager.Resource.Maintenance)
                     });
@@ -229,38 +269,14 @@ namespace MCSI.GUI
                 }
             }
         }
-        string[] serviceStrings = Enum.GetNames(typeof(ItemClass.Service));
-
-        private void PopulateList()
-        {
-            var prefabList = buildings.ToArray();
-            int index = m_prefabType.selectedIndex;
-
-            if (index != 0)
-                prefabList = buildings.Where(building => building.service == allowedServices[index - 1]).ToArray();
-
-            if (prefabList == null) return;
-
-            // Filtering
-            string filter = m_search.text.Trim().ToLower();
-            if (!String.IsNullOrEmpty(filter))
-                prefabList = buildings.Where(building => building.name.ToLower().Contains(filter.ToLower())).ToArray();
-
-            // Sorting
-            //Array.Sort(prefabList, CompareByNames);
-
-            // Display
-            m_itemList.RowsData.m_buffer = prefabList;
-            m_itemList.RowsData.m_size = prefabList.Length;
-
-            m_itemList.DisplayAt(0);
-        }
+        private UIButton _templateButton;
+        
         public int CompareByNames(XMLBuilding city1, XMLBuilding city2)
         {
             if (m_sortDirection.flip == UISpriteFlip.None)
-                return String.Compare(serviceStrings[(int)city1.service] + city1.name, serviceStrings[(int)city2.service] + city2.name);
+                return String.Compare(city1.name, city2.name);
             else
-                return String.Compare(serviceStrings[(int)city1.service] + city1.name, serviceStrings[(int)city2.service] + city2.name);
+                return String.Compare(city1.name, city2.name);
         }
     }
 }
