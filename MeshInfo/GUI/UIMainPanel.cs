@@ -2,17 +2,19 @@ using UnityEngine;
 using ColossalFramework.UI;
 
 using System;
-using MCSI;
+
 using UIUtils = SamsamTS.UIUtils;
 using ColossalFramework;
 using System.Collections.Generic;
 using System.Linq;
+using ColossalFramework.Globalization;
 
 namespace MCSI.GUI
 {
     public class UIMainPanel : UIPanel
     {
         private UITitleBar m_title;
+        private UITabstrip _tabstrip;
         private UIDropDown m_prefabType;
         private UIDropDown m_sorting;
         private UISprite m_sortDirection;
@@ -20,11 +22,6 @@ namespace MCSI.GUI
 
         private UIFastList m_itemList;
         private static readonly PositionData<ItemClass.Service>[] kServices = Utils.GetOrderedEnumData<ItemClass.Service>("Game").Where(s => CanShowService(s.enumValue)).ToArray();
-
-        private bool m_showDefault = false;
-
-        private bool m_isSorted = false;
-        private const int m_maxIterations = 10;
 
         public override void Start()
         {
@@ -56,7 +53,7 @@ namespace MCSI.GUI
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.K))
             {
                 isVisible = true;
-                InitializePreafabLists();
+                PopulateList();
             }
         }
 
@@ -64,32 +61,18 @@ namespace MCSI.GUI
         {
             float offset = 40f;
 
-            // Title Bar
             m_title = AddUIComponent<UITitleBar>();
             m_title.iconSprite = "IconAssetBuilding";
             m_title.title = "Mayoral City Service Info " + MCSI.version;
 
-            // Type DropDown
-            UILabel label = AddUIComponent<UILabel>();
-            label.textScale = 0.8f;
-            label.padding = new RectOffset(0, 0, 8, 0);
-            label.relativePosition = new Vector3(15f, offset + 5f);
-            label.text = "Type :";
-
-            m_prefabType = UIUtils.CreateDropDown(this);
-            m_prefabType.width = 110;
-            m_prefabType.AddItem("All");
-            foreach (var allowedService in allowedServices)
-                m_prefabType.AddItem(allowedService.ToString());
-            m_prefabType.selectedIndex = 0;
-            m_prefabType.relativePosition = label.relativePosition + new Vector3(60f, 0f);
-
-            m_prefabType.eventSelectedIndexChanged += (c, t) =>
-            {
-                m_prefabType.enabled = false;
-                PopulateList();
-                m_prefabType.enabled = true;
-            };
+            _tabstrip = UIUtils.CreateTabStrip(this);
+            _tabstrip.tabPages = UIUtils.CreateTabContainer(this);
+            _templateButton = UIUtils.CreateTabButton(this);
+            for (int i = 0; i < kServices.Length; i++)
+                SpawnSubEntry(_tabstrip, kServices[i]);
+            _tabstrip.relativePosition = new Vector3(15f, offset + 5f);
+            _tabstrip.eventSelectedIndexChanged += (c, t) => PopulateList();
+            Destroy(_templateButton);
             /*
             // Sorting DropDown
             label = AddUIComponent<UILabel>();
