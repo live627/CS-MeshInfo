@@ -83,7 +83,7 @@ namespace MCSI.GUI
 
             m_lodTextureSize.text = m_meshData.status;
             float num = m_meshData.upkeep * 0.0016f;
-            m_textureSize.text = num.ToString((num < 10f) ? Settings.moneyFormat : Settings.moneyFormatNoCents, LocaleManager.cultureInfo);
+            m_textureSize.text = num.ToString(num < 10f ? Settings.moneyFormatNoCents : Settings.moneyFormat, LocaleManager.cultureInfo);
 
             /*
             m_weight.text = (m_meshData.weight > 0) ? m_meshData.weight.ToString("N2") : "-";
