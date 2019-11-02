@@ -1,4 +1,4 @@
-﻿using ColossalFramework.UI;
+using ColossalFramework.UI;
 using ICities;
 using System;
 using UnityEngine;
@@ -8,9 +8,9 @@ namespace MCSI
     public class MCSI : LoadingExtensionBase, IUserMod
     {
         #region IUserMod implementation
-        public string Name => $"Mayoral City Service Info (v{version}))";
+        public string Name => $"Mayoral City Service Info (v{version})";
 
-        public string Description => "Information on every city serice building all in one place. Triggered by Ctrl+Shift+K.";
+        public string Description => "Information on every city service building all in one place. Triggered by Ctrl+Shift+K.";
         #endregion
 
         private static GameObject m_gameObject;
