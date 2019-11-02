@@ -467,7 +467,7 @@ namespace MCSI.GUI
 
             // Panel 
             m_panel = AddUIComponent<UIPanel>();
-            m_panel.atlas = UIUtils.GetAtlas("Ingame");
+            m_panel.atlas = GetUIView().defaultAtlas;
             m_panel.width = width - 10f;
             m_panel.height = height;
             m_panel.backgroundSprite = m_backgroundSprite;
@@ -487,7 +487,7 @@ namespace MCSI.GUI
             m_scrollbar.incrementAmount = 50;
 
             UISlicedSprite tracSprite = m_scrollbar.AddUIComponent<UISlicedSprite>();
-            tracSprite.atlas = UIUtils.GetAtlas("Ingame");
+            tracSprite.atlas = GetUIView().defaultAtlas;
             tracSprite.relativePosition = Vector2.zero;
             tracSprite.autoSize = true;
             tracSprite.size = tracSprite.parent.size;
@@ -497,7 +497,7 @@ namespace MCSI.GUI
             m_scrollbar.trackObject = tracSprite;
 
             UISlicedSprite thumbSprite = tracSprite.AddUIComponent<UISlicedSprite>();
-            thumbSprite.atlas = UIUtils.GetAtlas("Ingame");
+            thumbSprite.atlas = GetUIView().defaultAtlas;
             thumbSprite.relativePosition = Vector2.zero;
             thumbSprite.fillDirection = UIFillDirection.Vertical;
             thumbSprite.autoSize = true;

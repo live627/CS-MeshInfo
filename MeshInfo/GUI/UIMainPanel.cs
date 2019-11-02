@@ -26,16 +26,16 @@ namespace MCSI.GUI
         public override void Start()
         {
             base.Start();
+            UIView uIView = GetUIView();
 
             name = "MCSI";
-            atlas = UIUtils.GetAtlas("Ingame");
             backgroundSprite = "UnlockingPanel2";
             isVisible = false;
             canFocus = true;
             isInteractive = true;
             width = 770;
             height = 475;
-            relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2), Mathf.Floor((GetUIView().fixedHeight - height) / 2));
+            relativePosition = new Vector3(Mathf.Floor((uIView.fixedWidth - width) / 2), Mathf.Floor((uIView.fixedHeight - height) / 2));
 
             SetupControls();
         }
@@ -97,7 +97,7 @@ namespace MCSI.GUI
 
             // Sorting direction
             m_sortDirection = AddUIComponent<UISprite>();
-            m_sortDirection.atlas = UIUtils.GetAtlas("Ingame");
+            m_sortDirection.atlas = GetUIView().defaultAtlas;
             m_sortDirection.spriteName = "IconUpArrow";
             m_sortDirection.relativePosition = m_sorting.relativePosition + new Vector3(130f, 0f);
 

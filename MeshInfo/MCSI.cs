@@ -1,4 +1,4 @@
-using ColossalFramework.UI;
+﻿using ColossalFramework.UI;
 using ICities;
 using System;
 using UnityEngine;

@@ -17,7 +17,7 @@ namespace MCSI.GUI
             get { return m_icon.spriteName; }
             set {
                 if (m_icon == null) return;
-                m_icon.atlas = UIUtils.GetAtlas("Ingame");
+                m_icon.atlas = GetUIView().defaultAtlas;
                 m_icon.spriteName = value;
 
                 if (m_icon.spriteInfo != null)
@@ -76,7 +76,7 @@ namespace MCSI.GUI
             m_title.relativePosition = new Vector3(50, 13);
             m_title.text = title;
 
-            m_close.atlas = UIUtils.GetAtlas("Ingame");
+            m_close.atlas = GetUIView().defaultAtlas;
             m_close.relativePosition = new Vector3(width - 35, 2);
             m_close.normalBgSprite = "buttonclose";
             m_close.hoveredBgSprite = "buttonclosehover";

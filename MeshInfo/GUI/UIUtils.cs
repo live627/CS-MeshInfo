@@ -16,7 +16,6 @@ namespace SamsamTS
         {
             UIButton button = parent.AddUIComponent<UIButton>();
 
-            button.atlas = GetAtlas("Ingame");
             button.size = new Vector2(90f, 30f);
             button.textScale = 0.9f;
             button.normalBgSprite = "ButtonMenu";
@@ -36,13 +35,11 @@ namespace SamsamTS
             checkBox.clipChildren = true;
 
             UISprite sprite = checkBox.AddUIComponent<UISprite>();
-            sprite.atlas = GetAtlas("Ingame");
             sprite.spriteName = "ToggleBase";
             sprite.size = new Vector2(16f, 16f);
             sprite.relativePosition = Vector3.zero;
 
             checkBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
-            ((UISprite)checkBox.checkedBoxObject).atlas = GetAtlas("Ingame");
             ((UISprite)checkBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
             checkBox.checkedBoxObject.size = new Vector2(16f, 16f);
             checkBox.checkedBoxObject.relativePosition = Vector3.zero;
@@ -59,7 +56,6 @@ namespace SamsamTS
         {
             UITextField textField = parent.AddUIComponent<UITextField>();
 
-            textField.atlas = GetAtlas("Ingame");
             textField.size = new Vector2(90f, 20f);
             textField.padding = new RectOffset(6, 6, 3, 3);
             textField.builtinKeyNavigation = true;
@@ -81,7 +77,6 @@ namespace SamsamTS
         {
             UIDropDown dropDown = parent.AddUIComponent<UIDropDown>();
 
-            dropDown.atlas = GetAtlas("Ingame");
             dropDown.size = new Vector2(90f, 30f);
             dropDown.listBackground = "GenericPanelLight";
             dropDown.itemHeight = 30;
@@ -106,7 +101,6 @@ namespace SamsamTS
 
             UIButton button = dropDown.AddUIComponent<UIButton>();
             dropDown.triggerButton = button;
-            button.atlas = GetAtlas("Ingame");
             button.text = "";
             button.size = dropDown.size;
             button.relativePosition = new Vector3(0f, 0f);
@@ -234,16 +228,9 @@ namespace SamsamTS
             return label;
         }
 
-        private static readonly Dictionary<string, UITextureAtlas> atlases;
-        private static UITextureAtlas textureAtlas;
+        internal static readonly UITextureAtlas textureAtlas;
 
-        static UIUtils()
-        {
-            textureAtlas = CreateTextureAtlas();
-            atlases = Resources.FindObjectsOfTypeAll<UITextureAtlas>().ToDictionary(g => g.name, g => g);
-        }
-
-        public static UITextureAtlas GetAtlas(string name) => atlases[name];
+        static UIUtils() => textureAtlas = CreateTextureAtlas();
 
         private static UITextureAtlas CreateTextureAtlas()
         {
@@ -252,7 +239,7 @@ namespace SamsamTS
             Rect[] regions = texture2D.PackTextures(textures, 0, 10);
             Material material = Object.Instantiate(UIView.GetAView().defaultAtlas.material);
             material.mainTexture = texture2D;
-            textureAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
+            UITextureAtlas textureAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             textureAtlas.material = material;
             textureAtlas.name = "MCSI";
 

@@ -27,7 +27,7 @@ namespace MCSI.GUI
                 if (m_background == null)
                 {
                     m_background = AddUIComponent<UIPanel>();
-                    m_background.atlas = UIUtils.GetAtlas("MCSI");
+                    m_background.atlas = UIUtils.textureAtlas;
                     m_background.width = width;
                     m_background.height = 40f;
                     m_background.relativePosition = Vector2.zero;
