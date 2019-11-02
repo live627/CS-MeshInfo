@@ -215,13 +215,13 @@ namespace SamsamTS
         {
             UILabel label = parent.AddUIComponent<UILabel>();
             label.textScale = 0.9f;
-            label.width = 90f;
+            label.width = width;
             label.height = height;
 
             return label;
         }
 
-        public static UILabel CreateLabelForGrid(UIComponent parent, Vector3 offset, float width, float height)
+        public static UILabel CreateLabelForGrid(UIComponent parent, UIComponent component, float width, float height)
         {
             UILabel label = parent.AddUIComponent<UILabel>();
             label.textScale = 0.9f;
@@ -229,7 +229,7 @@ namespace SamsamTS
             label.height = height;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.pivot = UIPivotPoint.MiddleCenter;
-            label.relativePosition = offset + new Vector3(width, 0f);
+            label.relativePosition = component.relativePosition + new Vector3(component.width, 0f);
 
             return label;
         }

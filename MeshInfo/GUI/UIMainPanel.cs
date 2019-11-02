@@ -38,12 +38,6 @@ namespace MCSI.GUI
             relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2), Mathf.Floor((GetUIView().fixedHeight - height) / 2));
 
             SetupControls();
-
-        }
-
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
         }
 
         public override void Update()
@@ -70,7 +64,7 @@ namespace MCSI.GUI
             _templateButton = UIUtils.CreateTabButton(this);
             for (int i = 0; i < kServices.Length; i++)
                 SpawnSubEntry(_tabstrip, kServices[i]);
-            _tabstrip.relativePosition = new Vector3(15f, offset + 5f);
+            _tabstrip.relativePosition = new Vector3(15f, offset);
             _tabstrip.eventSelectedIndexChanged += (c, t) => PopulateList();
             Destroy(_templateButton);
             /*
@@ -133,7 +127,7 @@ namespace MCSI.GUI
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
             label.text = Locale.Get("EXTENDED_PUBLIC_TRANSPORT_UI_ITEM_1");
-            label.relativePosition = new Vector3(15f, offset + 50f);
+            label.relativePosition = new Vector3(15f, offset + 45f);
 
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
@@ -143,7 +137,7 @@ namespace MCSI.GUI
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
             label.text = Locale.Get("CAMPUSPANEL_VARSITYSPORTS_UPKEEP");
-            label.relativePosition = new Vector3(width - 135f, offset + 50f);
+            label.relativePosition = new Vector3(675f, offset + 45f);
             
             // Item List
             m_itemList = UIFastList.Create<UIPrefabItem>(this);

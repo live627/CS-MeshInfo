@@ -49,7 +49,7 @@ namespace MCSI.GUI
             width = 740f;
             height = 40f;
 
-            m_name = UIUtils.CreateLabel(this, 90f, height);
+            m_name = UIUtils.CreateLabel(this, 300f, height);
             m_name.textAlignment = UIHorizontalAlignment.Left;
             m_name.pivot = UIPivotPoint.MiddleLeft;
             m_name.relativePosition = new Vector3(10f, 0f);
