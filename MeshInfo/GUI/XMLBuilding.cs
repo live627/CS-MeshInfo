@@ -12,5 +12,6 @@ namespace MCSI.GUI
         public string status = "";
         public string stats = "";
         public InstanceID instanceID;
+        public string district;
     }
 }

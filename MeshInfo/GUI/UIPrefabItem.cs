@@ -14,7 +14,7 @@ namespace MCSI.GUI
         private UILabel m_weight;
         private UILabel m_lodWeight;
         private UILabel m_textureSize;
-        private UILabel m_lodTextureSize;
+        private UILabel statusLabel;
         private UIPanel m_background;
 
         private XMLBuilding m_meshData;
@@ -53,8 +53,9 @@ namespace MCSI.GUI
             m_name.textAlignment = UIHorizontalAlignment.Left;
             m_name.pivot = UIPivotPoint.MiddleLeft;
             m_name.relativePosition = new Vector3(10f, 0f);
-            m_lodTextureSize = UIUtils.CreateLabelForGrid(this, m_name.relativePosition, 200f, height);
-            m_textureSize = UIUtils.CreateLabelForGrid(this, m_lodTextureSize.relativePosition, 90f, height);
+            statusLabel = UIUtils.CreateLabelForGrid(this, m_name, 190f, height);
+            m_triangles = UIUtils.CreateLabelForGrid(this, statusLabel, 150f, height);
+            m_textureSize = UIUtils.CreateLabelForGrid(this, m_triangles, 90f, height);
 
             eventMouseEnter += (component, eventParam) => Background.opacity = Mathf.Lerp(baseBgOpacity, 1, 0.5f);
             eventMouseLeave += (component, eventParam) => Background.opacity = baseBgOpacity;
@@ -79,9 +80,8 @@ namespace MCSI.GUI
             if (m_meshData == null || m_name == null) return; 
 
             m_name.text = m_meshData.name;
-            m_name.tooltip = m_meshData.tooltip;
-
-            m_lodTextureSize.text = m_meshData.status;
+            statusLabel.text = m_meshData.status;
+            m_triangles.text = m_meshData.district;
             float num = m_meshData.upkeep * 0.0016f;
             m_textureSize.text = num.ToString(num < 10f ? Settings.moneyFormatNoCents : Settings.moneyFormat, LocaleManager.cultureInfo);
 

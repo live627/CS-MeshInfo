@@ -137,6 +137,11 @@ namespace MCSI.GUI
 
             label = AddUIComponent<UILabel>();
             label.textScale = 0.9f;
+            label.text = Locale.Get("TUTORIAL_ADVISER_TITLE", "District");
+            label.relativePosition = new Vector3(550f, offset + 45f);
+
+            label = AddUIComponent<UILabel>();
+            label.textScale = 0.9f;
             label.text = Locale.Get("CAMPUSPANEL_VARSITYSPORTS_UPKEEP");
             label.relativePosition = new Vector3(width - 135f, offset + 50f);
             
@@ -185,9 +190,10 @@ namespace MCSI.GUI
             buildingMap.Clear();
             string filter = m_search.text.Trim().ToLower();
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            DistrictManager districtManager = Singleton<DistrictManager>.instance;
             for (int i = 0; i < kServices.Length; i++)
                 if (_tabstrip.selectedIndex == i)
-                    GetServiceBuildings(buildingManager, kServices[i].enumValue, filter);
+                    GetServiceBuildings(buildingManager, districtManager, kServices[i].enumValue, filter);
 
             // !!! Temporaary. Make buildings an array.
             var prefabList = buildings.ToArray();
@@ -208,7 +214,7 @@ namespace MCSI.GUI
             return num;
         }
 
-        private void GetServiceBuildings(BuildingManager buildingManager, ItemClass.Service service, string filter)
+        private void GetServiceBuildings(BuildingManager buildingManager, DistrictManager districtManager, ItemClass.Service service, string filter)
         {
             var m_size = buildingManager.GetServiceBuildings(service);
             for (ushort i = 0; i < m_size.m_size; i++)
@@ -226,10 +232,15 @@ namespace MCSI.GUI
 
                     InstanceID instanceID = InstanceID.Empty;
                     instanceID.Building = m_size[i];
+                    byte districtID = districtManager.GetDistrict(building.m_position);
+                    byte parkID = districtManager.GetPark(building.m_position);
                     buildings.Add(new XMLBuilding
                     {
                         instanceID = instanceID,
                         name = name,
+                        district = parkID != 0 ? districtManager.GetParkName(parkID) : districtID == 0 
+                            ? Singleton<SimulationManager>.instance.m_metaData.m_CityName
+                            : districtManager.GetDistrictName(districtID),
                         position = building.m_position,
                         service = service,
                         stats = info.m_buildingAI.GetLocalizedStats(m_size[i], ref building).Replace(Environment.NewLine, "; "),
